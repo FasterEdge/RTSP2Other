@@ -14,7 +14,7 @@
 - **自动守护**: 输出进程崩溃/卡死自动重启(指数退避); 无进展守护(watchdog)自动恢复挂死的输入连接。
 - **优雅退出**: `Ctrl+C` / `SIGTERM` 会先让 ffmpeg 正常收尾(mp4 等文件保持可播放), 再清理子进程。
 - **完整配置**: YAML 配置, 覆盖输入、转码参数(码率/CRF/帧率/分辨率/编码器/硬件加速)、音频、各类输出专有参数。
-- **附带二进制**: 仓库内置静态 `ffmpeg` / `ffprobe` / `mediamtx`(linux-amd64, 用于 Docker; 也可下载本机平台), 单文件均 < 100MB。
+- **多平台内置二进制**: 仓库已内置 **4 大平台**(linux/darwin × amd64/arm64)的静态 `ffmpeg` / `ffprobe` / `mediamtx`(共 12 个文件, 单文件均 < 100MB), 下载即用, 无需各自安装 ffmpeg。
 - **开箱即用**: 提供 `Dockerfile` / `docker-compose.yml` / `Makefile` / 下载脚本。
 
 ---
@@ -41,12 +41,24 @@
 ### 1. 准备二进制
 
 ```bash
-# 方式 A: 使用仓库已内置的(linux-amd64)或执行脚本下载本机平台
-./scripts/download.sh              # 自动下载当前平台(linux-amd64/arm64, darwin-amd64/arm64)的 ffmpeg + mediamtx
+# 方式 A: 使用仓库已内置的二进制(推荐)
+#   bin/ 下已带 4 个平台(linux/darwin × amd64/arm64), 工具按当前平台自动选用:
+#     bin/<os>-<arch>/{ffmpeg,ffprobe,mediamtx}
+#   也可以执行脚本重新下载/升级本机平台:
+./scripts/download.sh              # 自动下载当前平台
+./scripts/download.sh all          # 下载全部 4 个平台
 
 # 方式 B: 使用系统已安装的 ffmpeg(如 macOS: brew install ffmpeg), mediamtx 可选
 #   - 工具会自动按优先级查找: 配置 path > 环境变量 > bin/<os>-<arch>/ > PATH
 ```
+
+内置二进制来源与版本:
+
+| 平台 | ffmpeg / ffprobe | mediamtx |
+|---|---|---|
+| linux-amd64 / linux-arm64 | johnvansickle 静态 7.0.2 | v1.20.1 (源码编译静态) |
+| darwin-amd64 | osxexperts.net 静态 8.0 | v1.20.1 (源码编译静态) |
+| darwin-arm64 | osxexperts.net 静态 9.0 | v1.20.1 (源码编译静态) |
 
 ### 2. 修改配置
 

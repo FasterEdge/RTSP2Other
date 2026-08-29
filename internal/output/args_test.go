@@ -119,6 +119,31 @@ func TestMJPGArgs(t *testing.T) {
 	}
 }
 
+func TestMP4ArgsOverwrite(t *testing.T) {
+	r := newMP4Runner(&config.OutputConfig{
+		Name: "m",
+		Type: "mp4",
+		Path: "/tmp/out/cam.mp4",
+	}, nil, testLog())
+	args := r.Args()
+	// -y 必须在参数最前, 保证覆盖已存在文件时不会触发 "Overwrite? [y/N]" 而退出
+	if len(args) == 0 || args[0] != "-y" {
+		t.Errorf("mp4 参数必须以 -y 开头: %v", args)
+	}
+	hasFrag := false
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-movflags" && i+1 < len(args) && args[i+1] == "+frag_keyframe+empty_moov" {
+			hasFrag = true
+		}
+	}
+	if !hasFrag {
+		t.Errorf("mp4 参数缺少分段式 movflags: %v", args)
+	}
+	if args[len(args)-3] != "-f" || args[len(args)-2] != "mp4" {
+		t.Errorf("mp4 参数结尾错误: %v", args)
+	}
+}
+
 func contains(s []string, v string) bool {
 	for _, x := range s {
 		if x == v {

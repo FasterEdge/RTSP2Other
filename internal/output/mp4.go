@@ -39,7 +39,11 @@ func (r *mp4Runner) Args() []string {
 		r.log.Error("mp4 视频参数生成失败", "output", r.oc.Name, "err", err)
 	}
 	aa := BuildAudioArgs(r.oc.Audio)
-	args := append(va, aa...)
+	// -y: 允许覆盖已存在的输出文件(否则 ffmpeg 在非交互模式下会因
+	// "File already exists. Overwrite? [y/N]" 而直接退出)
+	args := []string{"-y"}
+	args = append(args, va...)
+	args = append(args, aa...)
 
 	if r.oc.Rotation != "" {
 		// 定时滚动分片: 生成 yyyyMMdd_HHmmss 命名的 mp4

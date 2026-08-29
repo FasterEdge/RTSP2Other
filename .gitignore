@@ -9,6 +9,9 @@
 
 # mediamtx 生成物
 /.mediamtx/
+# mediamtx 在启动目录自动生成的自签名 TLS 凭据
+auto.crt
+auto.key
 
 # 编辑器/系统
 .DS_Store
