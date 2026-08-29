@@ -1,0 +1,10 @@
+.git
+.gitignore
+output
+*.log
+*.md
+Dockerfile
+docker-compose.yml
+Makefile
+bin
+scripts

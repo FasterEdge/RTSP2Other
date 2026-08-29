@@ -1,0 +1,20 @@
+# 构建产物
+/rtsp2other
+/dist/
+
+# 运行输出
+/output/
+*.log
+*.mp4
+
+# mediamtx 生成物
+/.mediamtx/
+
+# 编辑器/系统
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# 下载脚本的临时目录
+/tmp/

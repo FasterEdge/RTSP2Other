@@ -1,0 +1,138 @@
+# =====================================================================
+# rtsp2other 配置示例
+# 所有可选项均已列出并注释; 未填写的项使用默认值。
+# 使用: rtsp2other -config example-config.yaml
+# =====================================================================
+
+# ------------------ 输入源(通常是 RTSP 摄像机) ------------------
+input:
+  url: "rtsp://admin:pass@192.168.1.64:554/stream1"   # 必填; 也支持 http/https/本地文件/管道
+  transport: "tcp"          # rtsp 传输方式: tcp | udp (默认 tcp, 更稳定)
+  reconnect: true           # ffmpeg 层重连(http/file 有效; rtsp 由进程守护重启兜底)
+  # socket_timeout_ms: 5000 # 可选: rtsp socket 超时(毫秒), 通过 -rw_timeout 注入。
+                            # 注意: Homebrew 版 ffmpeg 不支持该选项, 请留 0(默认);
+                            # 本仓库附带的静态构建(Docker 镜像)支持, 建议设 5000。
+                            # 进程级兜底由 ffmpeg.watchdog_timeout 提供, 即使不设也能自动恢复。
+  extra_args: []            # 追加在 "-i url" 之前的额外输入参数
+    # 例如: ["-fflags", "nobuffer", "-analyzeduration", "1000000"]
+
+# ------------------ 内置 HTTP 服务(状态页/播放页/流媒体) ------------------
+http:
+  enabled: true             # 关闭后 mjpg 输出不可用, hls/mp4 仍可写文件
+  listen: "0.0.0.0:8080"    # 所有 HTTP 流共享此端口
+  prefix: ""                # 反向代理场景的前缀, 例如 "/rtsp2other"
+
+# ------------------ ffmpeg ------------------
+ffmpeg:
+  path: ""                  # 留空自动查找: RTSP2OTHER_FFMPEG > bin/<os>-<arch>/ffmpeg > PATH
+  probe: true               # 启动时用 ffprobe 打印输入摘要
+  log_level: "warning"      # ffmpeg stderr 日志级别: quiet|error|warning|info|debug
+  global_args: ["-hide_banner"]  # 追加到 ffmpeg 最前面的全局参数
+  hardware_accel: ""        # 视频转码优先使用的硬件编码器, 如 "h264_nvenc" / "h264_qsv" / "h264_videotoolbox"
+  restart_delay: "1s"       # 输出进程崩溃后初始重启延迟
+  max_restart_delay: "30s"  # 重启延迟上限(指数退避)
+  watchdog_timeout: "30s"   # 无进展守护: 超过该时长没有新帧则自动重启该输出(0=关闭)
+                            # 通过 ffmpeg -progress 判断, 兼容任意构建; 建议保持开启
+
+# ------------------ mediamtx(rtsp push 模式的内置 RTSP 服务端) ------------------
+mediamtx:
+  path: ""                  # 留空自动查找: RTSP2OTHER_MTX > bin/<os>-<arch>/mediamtx > PATH
+  listen: "0.0.0.0:8554"    # RTSP 监听地址, 观看地址 rtsp://<本机IP>:8554/<输出名>
+  auth: ""                  # 可选 "user:pass", 为 RTSP 推拉流加鉴权
+  log_level: "info"         # error|warn|info|debug
+
+# ------------------ 输出管道 ------------------
+# 每个输出独立启动一个 ffmpeg 子进程, 独立重连/重启, 互不影响。
+# 五种类型: stdout | http_mjpg | rtsp | mp4 | hls
+outputs:
+
+  # 1) stdout: 把媒体流写到进程 stdout(可与管道/其他程序配合, 例如 |
+  #    rtsp2other ... | ffplay -)
+  - name: "cam1-stdout"
+    type: stdout
+    enabled: true
+    restart: true
+    format: "mpegts"        # mpegts | matroska | flv | h264 | hevc | mp4
+    video:
+      mode: "copy"          # copy: 不转码直接复制; transcode: 重新编码
+    audio:
+      mode: "copy"          # copy | transcode | disable
+    # 注意: 一个配置最多只能有一个 stdout 输出
+
+  # 2) http_mjpg: 本地 HTTP MJPEG 流, 浏览器 <img> / VLC 直接看, 支持多客户端
+  - name: "cam1-mjpg"
+    type: http_mjpg
+    enabled: true
+    restart: true
+    quality: 3              # -q:v, 2~5, 越小质量越高
+    video:
+      mode: "transcode"
+      codec: "mjpeg"        # 固定为 mjpeg
+      fps: 15               # 输出帧率(越大越占带宽/CPU)
+      scale: "1280x720"     # 缩放; 留空保持原分辨率
+      extra_args: []        # 例如 ["-threads", "2"]
+    # 观看: http://<本机IP>:8080/streams/cam1-mjpg.mjpg 或 /play/cam1-mjpg.mjpg
+
+  # 3) rtsp: 本地 RTSP 输出
+  #    mode=push  推送到内置 mediamtx, 支持多客户端观看, 需要 mediamtx 二进制
+  #    mode=listen 用 ffmpeg 内置 RTSP 服务端, 无需额外二进制, 但官方限制单客户端
+  - name: "cam1-rtsp"
+    type: rtsp
+    enabled: true
+    mode: "push"            # push | listen
+    target: ""              # push 默认 rtsp://127.0.0.1:8554/cam1-rtsp; 可改
+                            # listen 默认 rtsp://0.0.0.0:8555/cam1-rtsp(改端口请自定义 target)
+    video:
+      mode: "transcode"
+      codec: "h264"
+      bitrate: "2M"
+      maxrate: "2M"
+      bufsize: "4M"
+      preset: "veryfast"
+      tune: "zerolatency"   # 低延迟推流
+      crf: 23
+      gop: 50               # 关键帧间隔
+      scale: ""             # 例如 "1280x720"
+      fps: 0
+      pix_fmt: "yuv420p"
+    audio:
+      mode: "copy"
+    # 观看: ffplay rtsp://<本机IP>:8554/cam1-rtsp  或 VLC 打开
+
+  # 4) mp4: 分段式(fragmented)mp4 流式文件, 边写边可经 HTTP 播放
+  - name: "cam1-mp4"
+    type: mp4
+    enabled: true
+    path: "output/cam1.mp4"  # 输出文件路径
+    rotation: ""             # 例如 "30s" 则每 30 秒滚动一个新文件(cam1_20260829_103000.mp4)
+    video:
+      mode: "transcode"
+      codec: "h264"
+      bitrate: "1M"
+      crf: 23
+      preset: "veryfast"
+      fps: 0
+      scale: ""
+    audio:
+      mode: "copy"
+    # 播放: http://<本机IP>:8080/streams/cam1-mp4.mp4 或 /play/cam1-mp4.mp4
+    # 直接访问文件也支持范围请求
+
+  # 5) hls: HLS 直播流(fMP4 切片), 适合网页/移动端低延迟播放
+  - name: "cam1-hls"
+    type: hls
+    enabled: true
+    dir: "output/hls/cam1"  # 切片输出目录(自动创建)
+    segment_time: 4          # 每个切片秒数
+    segment_list_size: 6     # 直播滚动窗口保留的切片数
+    playlist_type: "live"    # live | event | vod
+    segment_type: "fmp4"     # fmp4 | mpegts
+    video:
+      mode: "transcode"
+      codec: "h264"
+      bitrate: "1M"
+      crf: 23
+      preset: "veryfast"
+    audio:
+      mode: "copy"
+    # 播放: http://<本机IP>:8080/streams/cam1-hls/index.m3u8 或 /play/cam1-hls.m3u8

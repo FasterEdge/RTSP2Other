@@ -1,0 +1,20 @@
+services:
+  rtsp2other:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: rtsp2other:latest
+    container_name: rtsp2other
+    restart: unless-stopped
+    # 挂载你的配置文件(注意 RTSP 输入通常需能访问内网摄像机)
+    volumes:
+      - ./rtsp2other.yaml:/app/rtsp2other.yaml:ro
+      # 输出文件(可选): 让 mp4/hls 写到宿主机
+      # - ./output:/app/output
+    ports:
+      - "8080:8080"   # HTTP 状态页 / MJPG / HLS / MP4
+      - "8554:8554"   # RTSP(mediamtx, rtsp push 输出)
+      - "8555:8555"   # RTSP(ffmpeg listen 模式输出, 可选)
+    environment:
+      - TZ=Asia/Shanghai
+    command: ["-config", "/app/rtsp2other.yaml"]
