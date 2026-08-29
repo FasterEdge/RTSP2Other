@@ -3,7 +3,7 @@
 # 下载静态 ffmpeg / ffprobe / mediamtx 到 bin/<os>-<arch>/
 # 用法:
 #   ./scripts/download.sh                 # 下载当前平台
-#   ./scripts/download.sh linux-amd64     # 指定平台: linux-amd64 | linux-arm64 | darwin-amd64 | darwin-arm64
+#   ./scripts/download.sh linux-amd64     # 指定平台: linux-amd64 | linux-arm64 | darwin-amd64 | darwin-arm64 | windows-amd64
 #   ./scripts/download.sh all             # 全部
 # 环境变量:
 #   MTX_VERSION=v1.20.1                    # mediamtx 版本
@@ -29,6 +29,9 @@ FFPROBE_DARWIN_ARM64_URL="${FFPROBE_DARWIN_ARM64_URL:-https://www.osxexperts.net
 os_arch() {
   local os arch
   os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  case "$os" in
+    mingw*|msys*|cygwin*) os=windows;;
+  esac
   arch="$(uname -m)"
   case "$arch" in x86_64|amd64) arch=amd64;; arm64|aarch64) arch=arm64;; esac
   echo "${os}-${arch}"
@@ -90,13 +93,27 @@ download_darwin() { # $1 = arch(amd64|arm64)
   echo "==> 完成: $dest"
 }
 
+download_windows() { # $1 = arch(amd64)
+  local arch="$1" dest="$ROOT/bin/windows-$arch"
+  mkdir -p "$dest"
+  echo "==> ffmpeg/ffprobe (windows-$arch, 来自 gyan.dev)"
+  curl -fsSL --retry 2 --max-time 400 "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -o /tmp/rtsp2other-ffmpeg.zip
+  unzip -o -q /tmp/rtsp2other-ffmpeg.zip -d /tmp/rtsp2other-win-ff
+  local bin="$(dirname "$(find /tmp/rtsp2other-win-ff -name ffmpeg.exe | head -1)")"
+  mv "$bin/ffmpeg.exe" "$bin/ffprobe.exe" "$dest/"
+  chmod +x "$dest"/*.exe
+  download_mediamtx windows "$arch" "$dest"
+  echo "==> 完成: $dest"
+}
+
 target="${1:-$HERE}"
 case "$target" in
   all)
-    download_linux amd64; download_linux arm64; download_darwin amd64; download_darwin arm64 ;;
+    download_linux amd64; download_linux arm64; download_darwin amd64; download_darwin arm64; download_windows amd64 ;;
   linux-amd64) download_linux amd64 ;;
   linux-arm64) download_linux arm64 ;;
   darwin-amd64) download_darwin amd64 ;;
   darwin-arm64) download_darwin arm64 ;;
-  *) echo "未知平台: $target"; echo "支持: linux-amd64 | linux-arm64 | darwin-amd64 | darwin-arm64 | all"; exit 1 ;;
+  windows-amd64) download_windows amd64 ;;
+  *) echo "未知平台: $target"; echo "支持: linux-amd64 | linux-arm64 | darwin-amd64 | darwin-arm64 | windows-amd64 | all"; exit 1 ;;
 esac

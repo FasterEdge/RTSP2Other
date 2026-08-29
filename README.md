@@ -14,7 +14,7 @@
 - **自动守护**: 输出进程崩溃/卡死自动重启(指数退避); 无进展守护(watchdog)自动恢复挂死的输入连接。
 - **优雅退出**: `Ctrl+C` / `SIGTERM` 会先让 ffmpeg 正常收尾(mp4 等文件保持可播放), 再清理子进程。
 - **完整配置**: YAML 配置, 覆盖输入、转码参数(码率/CRF/帧率/分辨率/编码器/硬件加速)、音频、各类输出专有参数。
-- **多平台内置二进制**: 仓库已内置 **4 大平台**(linux/darwin × amd64/arm64)的静态 `ffmpeg` / `ffprobe` / `mediamtx`(共 12 个文件, 单文件均 < 100MB), 下载即用, 无需各自安装 ffmpeg。
+- **多平台内置二进制**: 仓库已内置 **5 大平台**(linux/darwin/windows × amd64/arm64)的静态 `ffmpeg` / `ffprobe` / `mediamtx`(共 15 个文件, 单文件均 < 100MB), 下载即用, 无需各自安装 ffmpeg。
 - **开箱即用**: 提供 `Dockerfile` / `docker-compose.yml` / `Makefile` / 下载脚本。
 
 ---
@@ -42,11 +42,11 @@
 
 ```bash
 # 方式 A: 使用仓库已内置的二进制(推荐)
-#   bin/ 下已带 4 个平台(linux/darwin × amd64/arm64), 工具按当前平台自动选用:
+#   bin/ 下已带 5 个平台(linux/darwin × amd64/arm64 + windows-amd64), 工具按当前平台自动选用:
 #     bin/<os>-<arch>/{ffmpeg,ffprobe,mediamtx}
 #   也可以执行脚本重新下载/升级本机平台:
-./scripts/download.sh              # 自动下载当前平台
-./scripts/download.sh all          # 下载全部 4 个平台
+./scripts/download.sh              # 自动下载当前平台(Windows 请在 git-bash 下运行)
+./scripts/download.sh all          # 下载全部 5 个平台
 
 # 方式 B: 使用系统已安装的 ffmpeg(如 macOS: brew install ffmpeg), mediamtx 可选
 #   - 工具会自动按优先级查找: 配置 path > 环境变量 > bin/<os>-<arch>/ > PATH
@@ -59,6 +59,10 @@
 | linux-amd64 / linux-arm64 | johnvansickle 静态 7.0.2 | v1.20.1 (源码编译静态) |
 | darwin-amd64 | osxexperts.net 静态 8.0 | v1.20.1 (源码编译静态) |
 | darwin-arm64 | osxexperts.net 静态 9.0 | v1.20.1 (源码编译静态) |
+| windows-amd64 | gyan.dev 静态 9.0 (ffmpeg.exe / ffprobe.exe) | v1.20.1 (源码编译) |
+
+> Windows 注意事项: Windows 不支持 ffmpeg 的 `-progress pipe:3`(ExtraFiles 限制),
+> 工具已自动禁用无进展看门狗(启动时会有日志提示), 崩溃重启与输入重连不受影响。
 
 ### 2. 修改配置
 
@@ -262,6 +266,9 @@ Homebrew on macOS 构建较特殊(不支持 `-rw_timeout`, 部分 RTSP listen �
 
 **Q: 为什么每个输出单独一个 ffmpeg 进程**
 为了输出之间彻底隔离: 一个输出(如 HLS)的故障与重启不影响其它输出。代价是多个 transcode 会多占 CPU; 对多数场景(多路监控)可接受, 如需共享解码可自行调整。
+
+**Q: Windows 上能跑吗**
+可以。仓库已内置 `bin/windows-amd64/` 的 ffmpeg.exe/ffprobe.exe/mediamtx.exe, 双击或在 PowerShell/cmd 运行 `rtsp2other.exe -config rtsp2other.yaml` 即可。受 Windows 进程模型限制: 无进展看门狗自动禁用(有日志提示), 优雅退出走 SIGKILL 兜底; 其余功能(多路输出/重启/HTTP 流)完全一致。
 
 **Q: mjpg 很卡**
 降低 `fps` / `scale` / 调大 `quality`; mjpg 是 MJPEG 逐帧传输, 高帧率高分辨率很占带宽。

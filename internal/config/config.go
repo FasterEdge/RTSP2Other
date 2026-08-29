@@ -405,23 +405,29 @@ func env(names ...string) string {
 
 // ResolveBinary 按优先级查找二进制。
 // 顺序: 配置 path > 环境变量 > bin/<os>-<arch>/ (相对 CWD 与可执行文件目录) > bin/ > PATH
+// Windows 下会自动追加 .exe 后缀, 且不检查执行权限位(Windows 文件无该位)。
 func ResolveBinary(name, cfgPath, envPath, envSuffix string) (string, error) {
+	win := runtime.GOOS == "windows"
+	exe := ""
+	if win {
+		exe = ".exe"
+	}
 	cands := []string{cfgPath, envPath}
-	rel := filepath.Join("bin", runtime.GOOS+"-"+runtime.GOARCH, name)
+	rel := filepath.Join("bin", runtime.GOOS+"-"+runtime.GOARCH, name+exe)
 	cands = append(cands, rel)
-	cands = append(cands, filepath.Join("bin", name))
+	cands = append(cands, filepath.Join("bin", name+exe))
 	if exe, err := os.Executable(); err == nil {
 		exeDir := filepath.Dir(exe)
 		cands = append(cands,
-			filepath.Join(exeDir, "bin", runtime.GOOS+"-"+runtime.GOARCH, name),
-			filepath.Join(exeDir, "bin", name),
+			filepath.Join(exeDir, "bin", runtime.GOOS+"-"+runtime.GOARCH, name+exe),
+			filepath.Join(exeDir, "bin", name+exe),
 		)
 	}
 	for _, p := range cands {
 		if p == "" {
 			continue
 		}
-		if st, err := os.Stat(p); err == nil && !st.IsDir() && st.Mode()&0111 != 0 {
+		if st, err := os.Stat(p); err == nil && !st.IsDir() && (win || st.Mode()&0111 != 0) {
 			abs, _ := filepath.Abs(p)
 			return abs, nil
 		}

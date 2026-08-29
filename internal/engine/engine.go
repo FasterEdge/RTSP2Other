@@ -12,6 +12,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"sync"
@@ -89,6 +90,9 @@ func (e *Engine) Add(oc *config.OutputConfig, runner output.Runner) *Output {
 
 // Start 启动所有输出管道(非阻塞)。
 func (e *Engine) Start() {
+	if runtime.GOOS == "windows" {
+		e.log.Warn("Windows 平台不支持无进展看门狗(ExtraFiles 限制), 已自动禁用; 崩溃重启/输入重连仍生效")
+	}
 	inputs := map[string][]string{}
 	for _, o := range e.outputs {
 		ic := &e.cfg.Input
@@ -327,9 +331,11 @@ func (o *Output) runOnce(ctx context.Context, inputArgs []string) error {
 	args := o.buildArgs(inputArgs)
 
 	// 无进展守护: 通过 ffmpeg 的 -progress 输出判断进程是否仍在出帧。
+	// 注意: Windows 不支持 ExtraFiles(fd 3+), 会直接报错, 因此在 Windows 上
+	// 禁用看门狗, 仅靠进程守护重启 + 输入重连兜底(见 Engine.Start 的日志说明)。
 	var progressR, pw *os.File
 	var watchdogStart func()
-	if o.engine.watchdogTimeout > 0 {
+	if o.engine.watchdogTimeout > 0 && runtime.GOOS != "windows" {
 		pr, pww, err := os.Pipe()
 		if err == nil {
 			progressR = pr
