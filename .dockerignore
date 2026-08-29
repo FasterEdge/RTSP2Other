@@ -6,5 +6,12 @@ output
 Dockerfile
 docker-compose.yml
 Makefile
-bin
 scripts
+
+# 只把 linux 平台的二进制放入构建上下文(供镜像按 TARGETARCH 拷贝),
+# darwin/windows 等其它平台的二进制不参与 docker 构建, 避免上下文过大。
+bin/**
+!bin/linux-amd64
+!bin/linux-amd64/**
+!bin/linux-arm64
+!bin/linux-arm64/**

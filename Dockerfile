@@ -1,28 +1,24 @@
-# syntax=docker/dockerfile:1
 # =====================================================================
-# rtsp2other 镜像: 多阶段构建, 自动下载静态 ffmpeg + mediamtx
+# rtsp2other 镜像: 多阶段构建
+# 镜像内的 ffmpeg / ffprobe / mediamtx 直接使用仓库内置的静态二进制
+# (bin/linux-<arch>/, 由 TARGETARCH 自动选择, 与镜像目标架构一致),
+# 构建过程不再从外部下载 ffmpeg, 保证镜像内容与仓库版本完全一致。
 # 构建: docker build -t rtsp2other .
 # 运行: docker run --rm -v $PWD/rtsp2other.yaml:/app/rtsp2other.yaml:ro \
 #                  -p 8080:8080 -p 8554:8554 rtsp2other
-# 注意: 本镜像在构建阶段从外部下载二进制, 需要网络。
+# 多架构: docker buildx build --platform linux/amd64,linux/arm64 -t rtsp2other .
 # =====================================================================
 
 # ---------- 基础运行镜像 ----------
 FROM alpine:3.21 AS base
 RUN apk add --no-cache ca-certificates tzdata
 
-# ---------- 资产层: 下载静态 ffmpeg 与 mediamtx ----------
+# ---------- 资产层: 按目标架构拷贝仓库内置静态二进制 ----------
 FROM base AS assets
 ARG TARGETARCH
-# johnvansickle 静态 ffmpeg(amd64/arm64)
-RUN apk add --no-cache curl tar xz \
-    && mkdir -p /assets \
-    && curl -fsSL "https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-${TARGETARCH}-static.tar.xz" -o /tmp/ffmpeg.tar.xz \
-    && tar -xJf /tmp/ffmpeg.tar.xz -C /assets --strip-components=1 --wildcards "*/ffmpeg" "*/ffprobe"
-# mediamtx
-ARG MEDIAMTX_VERSION=v1.20.1
-RUN curl -fsSL "https://github.com/bluenviron/mediamtx/releases/download/${MEDIAMTX_VERSION}/mediamtx_${MEDIAMTX_VERSION}_linux_${TARGETARCH}.tar.gz" -o /tmp/mtx.tar.gz \
-    && tar -xzf /tmp/mtx.tar.gz -C /assets mediamtx
+COPY bin/linux-${TARGETARCH}/ffmpeg /assets/ffmpeg
+COPY bin/linux-${TARGETARCH}/ffprobe /assets/ffprobe
+COPY bin/linux-${TARGETARCH}/mediamtx /assets/mediamtx
 
 # ---------- Go 构建 ----------
 FROM golang:1.24-alpine AS build

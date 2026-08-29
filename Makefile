@@ -30,7 +30,7 @@ vet:
 run: build
 	./$(BINARY) -config example-config.yaml
 
-## 构建 Docker 镜像(镜像内自带静态 ffmpeg + mediamtx)
+## 构建 Docker 镜像(镜像内 ffmpeg/mediamtx 取自仓库 bin/linux-<arch>/, 无需联网下载)
 docker:
 	docker build --build-arg VERSION=$(VERSION) -t rtsp2other:$(VERSION) .
 	docker tag rtsp2other:$(VERSION) rtsp2other:latest

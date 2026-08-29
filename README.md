@@ -94,9 +94,19 @@ docker run --rm \
   rtsp2other
 
 # 或 docker compose up -d (已带 docker-compose.yml)
+
+# 多架构镜像(amd64 + arm64)
+docker buildx build --platform linux/amd64,linux/arm64 -t rtsp2other .
 ```
 
-镜像在构建阶段自动下载静态 ffmpeg + mediamtx, 无需本地二进制; 运行阶段二进制已在镜像内。
+镜像内的 ffmpeg / ffprobe / mediamtx 直接取自仓库内置的**静态二进制**(`bin/linux-<arch>/`,
+构建时通过 `TARGETARCH` 自动选择与镜像目标架构一致的版本), 构建过程**无需联网下载 ffmpeg**,
+保证镜像内容与仓库版本完全一致。镜像目标与 ffmpeg 架构的对应关系:
+
+| 镜像平台 | 使用的二进制 |
+|---|---|
+| `linux/amd64` | `bin/linux-amd64/{ffmpeg,ffprobe,mediamtx}` |
+| `linux/arm64` | `bin/linux-arm64/{ffmpeg,ffprobe,mediamtx}` |
 
 ### 一次性任务 / 脚本
 
