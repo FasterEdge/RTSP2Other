@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 · https://github.com/FasterEdge · https://gitee.com/FasterEdge
 // rtsp2other: 用 Go 管理 ffmpeg 子进程, 把一路 RTSP 输入转换为
 // stdout / HTTP-MJPG / 本地 RTSP / mp4 流式文件 / HLS 等任意多路输出。
 package main
