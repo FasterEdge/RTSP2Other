@@ -21,7 +21,7 @@ import (
 	"rtsp2other/internal/output"
 )
 
-var version = "1.0.20260831" // 通过 -ldflags "-X main.version=..." 覆盖
+var version = "1.0.20260901" // 通过 -ldflags "-X main.version=..." 覆盖
 
 func main() {
 	cfgPath := flag.String("config", "rtsp2other.yaml", "配置文件路径")
