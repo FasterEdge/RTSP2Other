@@ -1,3 +1,8 @@
+// ─────────────────────────────────────────────────────────────
+// FasterEdge 开源项目
+// Github: https://github.com/FasterEdge
+// Gitee:  https://gitee.com/FasterEdge
+// ─────────────────────────────────────────────────────────────
 // Package mjpg 从 ffmpeg 的 MJPEG stdout 管道中切分出完整 JPEG 帧,
 // 并以 multipart/x-mixed-replace 广播给任意数量的 HTTP 客户端。
 package mjpg

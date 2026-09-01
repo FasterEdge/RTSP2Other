@@ -1,3 +1,8 @@
+// ─────────────────────────────────────────────────────────────
+// FasterEdge 开源项目
+// Github: https://github.com/FasterEdge
+// Gitee:  https://gitee.com/FasterEdge
+// ─────────────────────────────────────────────────────────────
 // Package mtx 管理内置的 mediamtx RTSP 服务端子进程, 为 rtsp(push) 输出提供多客户端 RTSP 服务。
 package mtx
 

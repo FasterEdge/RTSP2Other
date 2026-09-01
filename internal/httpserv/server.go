@@ -1,3 +1,8 @@
+// ─────────────────────────────────────────────────────────────
+// FasterEdge 开源项目
+// Github: https://github.com/FasterEdge
+// Gitee:  https://gitee.com/FasterEdge
+// ─────────────────────────────────────────────────────────────
 // Package httpserv 提供内置 HTTP 服务: 首页、健康检查、状态 JSON、各流类型的播放页。
 // 所有流媒体输出(MJPG/HLS/MP4)共享这一个监听端口, 通过路径区分。
 package httpserv
