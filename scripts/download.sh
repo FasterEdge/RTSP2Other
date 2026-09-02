@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 # =====================================================================
 # 下载静态 ffmpeg / ffprobe / mediamtx 到 bin/<os>-<arch>/
 # 用法:

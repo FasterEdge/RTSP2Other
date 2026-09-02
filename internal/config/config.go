@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 // Package config 定义 rtsp2other 的全部配置结构、默认值与校验逻辑。
 // 配置以 YAML 为主, 支持环境变量覆盖部分运行时参数。
 package config

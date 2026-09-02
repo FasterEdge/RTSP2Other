@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 // Package engine 负责 ffmpeg 子进程的完整生命周期管理:
 // 启动、监控、崩溃重启(指数退避)、优雅关闭, 以及输入探测。
 package engine

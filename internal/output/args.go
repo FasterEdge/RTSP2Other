@@ -1,3 +1,4 @@
+// FasterEdge 开源项目 - Github: https://github.com/FasterEdge - Gitee: https://gitee.com/FasterEdge
 // Package output 负责把每个输出配置翻译成 ffmpeg 参数,
 // 并提供 Runner 抽象(进程生命周期之外的资源, 如 MJPG Hub / HTTP 路由)。
 package output
