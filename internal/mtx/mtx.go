@@ -20,7 +20,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 const stateIdle = "idle"

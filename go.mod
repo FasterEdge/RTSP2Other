@@ -1,4 +1,4 @@
-module rtsp2other
+module github.com/FasterEdge/RTSP2Other
 
 go 1.23
 

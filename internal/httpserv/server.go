@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"rtsp2other/internal/config"
-	"rtsp2other/internal/engine"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/engine"
 )
 
 // StatusProvider 由引擎实现, 提供各输出的实时状态。

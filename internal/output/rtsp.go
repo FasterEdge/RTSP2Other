@@ -9,7 +9,7 @@ import (
 	"log/slog"
 	"os/exec"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // rtspRunner 支持两种 RTSP 输出方式:

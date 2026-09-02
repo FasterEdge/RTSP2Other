@@ -19,8 +19,8 @@ import (
 	"syscall"
 	"time"
 
-	"rtsp2other/internal/config"
-	"rtsp2other/internal/output"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/output"
 )
 
 const (

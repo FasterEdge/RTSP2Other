@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // mp4Runner 写入分段式(fragmented)mp4 文件, 支持 HTTP 范围请求即时播放;

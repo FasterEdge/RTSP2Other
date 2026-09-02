@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // BuildInputArgs 根据输入配置生成 "-i url" 之前的输入参数。

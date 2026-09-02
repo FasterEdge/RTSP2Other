@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strconv"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // hlsRunner 生成 HLS 直播流(fMP4 或 MPEG-TS 切片), 并通过 HTTP 静态服务对外提供。

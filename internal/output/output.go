@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os/exec"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // Registrar 允许 Runner 在启动前注册 HTTP 路由(由 HTTP 服务实现)。

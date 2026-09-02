@@ -14,11 +14,11 @@ import (
 	"syscall"
 	"time"
 
-	"rtsp2other/internal/config"
-	"rtsp2other/internal/engine"
-	"rtsp2other/internal/httpserv"
-	"rtsp2other/internal/mtx"
-	"rtsp2other/internal/output"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/engine"
+	"github.com/FasterEdge/RTSP2Other/internal/httpserv"
+	"github.com/FasterEdge/RTSP2Other/internal/mtx"
+	"github.com/FasterEdge/RTSP2Other/internal/output"
 )
 
 var version = "1.0.20260902" // 通过 -ldflags "-X main.version=..." 覆盖

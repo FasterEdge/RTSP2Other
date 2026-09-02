@@ -8,8 +8,8 @@ import (
 	"strings"
 	"sync"
 
-	"rtsp2other/internal/config"
-	"rtsp2other/internal/mjpg"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/mjpg"
 )
 
 // mjpgRunner 让 ffmpeg 以 MJPEG 编码输出到管道, Go 侧切分帧并通过 HTTP 广播。

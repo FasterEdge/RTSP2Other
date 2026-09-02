@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 // stdoutRunner 把转码/复用后的流写到进程 stdout(即工具自身 stdout)。

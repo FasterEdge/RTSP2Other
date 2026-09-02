@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"rtsp2other/internal/config"
+	"github.com/FasterEdge/RTSP2Other/internal/config"
 )
 
 func testLog() *slog.Logger {
