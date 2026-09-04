@@ -175,6 +175,13 @@ func (s *Server) outputLinks(o *config.OutputConfig) string {
 // handlePlay 提供内嵌播放页。
 func (s *Server) handlePlay(w http.ResponseWriter, r *http.Request) {
 	name := strings.TrimPrefix(r.URL.Path, s.prefix+"/play/")
+	// 流名直接拼接进 HTML 模板属性值, 必须严格白名单校验;
+	// 否则 /play/<任意片段> 可注入引号/标签形成反射型 XSS
+	// (HTTP 默认监听 0.0.0.0, 影响面不限于本机)。
+	if !validStreamName(name) {
+		http.NotFound(w, r)
+		return
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if strings.HasSuffix(name, ".mjpg") {
 		n := strings.TrimSuffix(name, ".mjpg")
@@ -192,6 +199,22 @@ func (s *Server) handlePlay(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http.NotFound(w, r)
+}
+
+// validStreamName 判定 /play/ 路径片段是否可作为流名:
+// 仅允许 URL 安全字符(字母/数字/下划线/连字符/点), 长度 1~128。
+func validStreamName(name string) bool {
+	if name == "" || len(name) > 128 {
+		return false
+	}
+	for _, c := range name {
+		if (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+			(c >= '0' && c <= '9') || c == '-' || c == '_' || c == '.' {
+			continue
+		}
+		return false
+	}
+	return true
 }
 
 const pageMJPG = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>MJPG</title></head>
