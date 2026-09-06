@@ -107,16 +107,15 @@ func (e *Engine) Start() {
 		}
 		go o.loop(e.ctx, inputArgs)
 	}
-	// 输入探测(可选)
-	if e.cfg.FFmpeg.Probe != nil && *e.cfg.FFmpeg.Probe {
-		for _, o := range e.outputs {
-			ic := &e.cfg.Input
-			if o.cfg.Input != nil {
-				ic = o.cfg.Input
-			}
-			e.probe(ic.URL)
-			break // 全局输入探测一次即可(自定义输入由各输出日志观察)
+	// 输入探测(可选): 探测第一个输出的输入(全局输入, 或该输出自定义输入)。
+	// 自定义输入较多时仅探测一次即可, 其余由各输出日志观察。
+	if e.cfg.FFmpeg.Probe != nil && *e.cfg.FFmpeg.Probe && len(e.outputs) > 0 {
+		o := e.outputs[0]
+		ic := &e.cfg.Input
+		if o.cfg.Input != nil {
+			ic = o.cfg.Input
 		}
+		e.probe(ic.URL)
 	}
 }
 
