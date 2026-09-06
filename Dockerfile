@@ -44,6 +44,9 @@ ENV RTSP2OTHER_FFMPEG=/usr/local/bin/ffmpeg \
 
 WORKDIR /app
 COPY example-config.yaml /app/rtsp2other.yaml
+# 以非 root 运行: ffmpeg/mediamtx 无需特权, 输出目录(默认 /app/output)已 chown 给 app
+RUN adduser -D -H -u 1000 app && chown -R app:app /app
+USER app
 
 EXPOSE 8080 8554 8555
 
