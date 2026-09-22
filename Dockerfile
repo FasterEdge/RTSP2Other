@@ -29,7 +29,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-ARG VERSION=1.0.20260902
+ARG VERSION=1.0.20260922
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/rtsp2other .
 
 # ---------- 最终镜像 ----------

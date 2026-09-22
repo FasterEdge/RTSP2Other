@@ -21,7 +21,7 @@ import (
 	"github.com/FasterEdge/RTSP2Other/internal/output"
 )
 
-var version = "1.0.20260902" // 通过 -ldflags "-X main.version=..." 覆盖
+var version = "1.0.20260922" // 通过 -ldflags "-X main.version=..." 覆盖
 
 func main() {
 	cfgPath := flag.String("config", "rtsp2other.yaml", "配置文件路径")
