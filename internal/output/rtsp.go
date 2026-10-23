@@ -7,6 +7,7 @@ package output
 
 import (
 	"log/slog"
+	"net/url"
 	"os/exec"
 
 	"github.com/FasterEdge/RTSP2Other/internal/config"
@@ -46,6 +47,17 @@ func (r *rtspRunner) Args() []string {
 func (r *rtspRunner) Bind(cmd *exec.Cmd) error { return nil }
 func (r *rtspRunner) Close() error             { return nil }
 
+// redactURL 掩码 URL 中的 userinfo(用户名:密码), 避免 /status.json 匿名泄露
+// 推流凭据(如 rtsp://user:pass@host 明文暴露给未授权客户端)。
+func redactURL(raw string) string {
+	u, err := url.Parse(raw)
+	if err != nil || u.User == nil {
+		return raw
+	}
+	u.User = url.User("***")
+	return u.String()
+}
+
 func (r *rtspRunner) Status() map[string]any {
-	return map[string]any{"mode": r.oc.RTSPMode, "target": r.oc.Target}
+	return map[string]any{"mode": r.oc.RTSPMode, "target": redactURL(r.oc.Target)}
 }
