@@ -151,8 +151,11 @@ func (s *Server) outputLinks(o *config.OutputConfig) string {
 	p := s.prefix
 	switch o.Type {
 	case "http_mjpg":
+		// o.Name 来自配置文件, 但与首页列表(L135 已转义)保持一致: 属性值拼接
+		// 前转义, 防配置含引号/尖括号时 HTML 结构破坏(自我注入面, 纵深一致)。
+		en := html.EscapeString(o.Name)
 		return fmt.Sprintf(`<a href="%s/streams/%s.mjpg">/streams/%s.mjpg</a> | <a href="%s/play/%s.mjpg">播放页</a>`,
-			p, o.Name, o.Name, p, o.Name)
+			p, en, en, p, en)
 	case "rtsp":
 		tgt := o.Target
 		if tgt == "" {
@@ -160,11 +163,13 @@ func (s *Server) outputLinks(o *config.OutputConfig) string {
 		}
 		return fmt.Sprintf(`<code>%s</code> (可用 VLC / ffplay 播放)`, html.EscapeString(tgt))
 	case "mp4":
+		en := html.EscapeString(o.Name)
 		return fmt.Sprintf(`<a href="%s/streams/%s.mp4">/streams/%s.mp4</a> | <a href="%s/play/%s.mp4">播放页</a> | 文件: <code>%s</code>`,
-			p, o.Name, o.Name, p, o.Name, html.EscapeString(o.Path))
+			p, en, en, p, en, html.EscapeString(o.Path))
 	case "hls":
+		en := html.EscapeString(o.Name)
 		return fmt.Sprintf(`<a href="%s/streams/%s-hls/index.m3u8">index.m3u8</a> | <a href="%s/play/%s.m3u8">播放页</a>`,
-			p, o.Name, p, o.Name)
+			p, en, p, en)
 	case "stdout":
 		return fmt.Sprintf("写入进程 stdout, 格式 <code>%s</code>", html.EscapeString(o.Format))
 	default:

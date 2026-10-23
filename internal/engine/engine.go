@@ -349,7 +349,7 @@ func (o *Output) runOnce(ctx context.Context, inputArgs []string) error {
 
 	o.log.Info("启动 ffmpeg", "cmd", strings.Join(args, " "))
 
-	cmd := exec.Command(o.engine.cfg.FFmpegPath, args...)
+	cmd := exec.CommandContext(ctx, o.engine.cfg.FFmpegPath, args...)
 	cmd.Env = os.Environ()
 	cmd.Stderr = &lineWriter{log: o.log, prefix: "[ffmpeg] "}
 	if progressR != nil {
