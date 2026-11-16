@@ -21,7 +21,7 @@ COPY bin/linux-${TARGETARCH}/ffprobe /assets/ffprobe
 COPY bin/linux-${TARGETARCH}/mediamtx /assets/mediamtx
 
 # ---------- Go 构建 ----------
-FROM golang:1.27-alpine AS build
+FROM golang:1.27.4-alpine AS build
 # 通过 goproxy.cn 拉取依赖, 避免在无外网代理环境(如国内网络/受限内网)构建时
 # go mod download 直连 proxy.golang.org 超时。
 ENV GOPROXY=https://goproxy.cn,direct
@@ -29,7 +29,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-ARG VERSION=1.0.20261022
+ARG VERSION=1.0.20261116
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w -X main.version=${VERSION}" -o /out/rtsp2other .
 
 # ---------- 最终镜像 ----------
